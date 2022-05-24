@@ -1,3 +1,1 @@
-pushd src
-python3 -m design_platformer.__main__
-popd
+python3 design_platformer.py

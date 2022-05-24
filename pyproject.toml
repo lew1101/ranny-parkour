@@ -12,6 +12,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry.dependencies]
 python = "^3.10"
 pygame = "^2.1.2"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 cx-Freeze = "^6.10"
