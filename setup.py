@@ -6,7 +6,7 @@ base = 'Win32GUI' if sys.platform == 'win32' else None
 
 executables = [
     Executable(
-        script='./src/design_platformer/__main__.py',
+        script='./main.py',
         base=base,
         target_name='design-platformer',
     )
@@ -15,7 +15,8 @@ executables = [
 # Dependencies are automatically detected, but it might need
 # fine tuning.
 build_exe_options = {
-    'packages': [],
+    'packages': ["pygame", "src.design_platformer"],
+    'include_files': ["src/design_platformer/assets/", "src/design_platformer/levels/"],
     'excludes': []
 }
 

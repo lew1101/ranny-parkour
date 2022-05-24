@@ -1,3 +1,3 @@
-build_targets=("bdist_dmg" "bdist_mac")
+build_targets=("bdist_dmg")
 
 python3 setup.py "${build_targets[@]/#/}" 
