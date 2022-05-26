@@ -6,7 +6,7 @@ base = 'Win32GUI' if sys.platform == 'win32' else None
 
 executables = [
     Executable(
-        script='./design_platformer.py',
+        script='./main.py',
         base=base,
         target_name='design-platformer',
     )
@@ -16,7 +16,7 @@ executables = [
 # fine tuning.
 build_exe_options = {
     'packages': ["pygame"],
-    'include_files': ["assets/", "levels/"],
+    'include_files': ["design_platformer/assets/", "design_platformer/levels/"],
     'excludes': []
 }
 
@@ -25,7 +25,7 @@ bdist_dmg_options = {
 }
 
 bdist_mac_options = {
-    'iconfile': 'assets/icons/icon.png'
+    'iconfile': 'design_platformer/assets/icons/icon.png'
 }
 
 
