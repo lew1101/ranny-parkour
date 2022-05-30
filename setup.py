@@ -15,7 +15,7 @@ executables = [
 # Dependencies are automatically detected, but it might need
 # fine tuning.
 build_exe_options = {
-    'packages': ["pygame"],
+    'packages': ["pygame", "yaml"],
     'include_files': ["design_platformer/assets/", "design_platformer/levels/"],
     'excludes': []
 }
