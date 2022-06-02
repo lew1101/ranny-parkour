@@ -1,2 +1,2 @@
-from design_platformer.__main__ import main
+from ranny_parkour.__main__ import main
 main()

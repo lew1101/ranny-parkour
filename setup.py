@@ -16,7 +16,7 @@ executables = [
 # fine tuning.
 build_exe_options = {
     'packages': ["pygame", "yaml"],
-    'include_files': ["design_platformer/assets/", "design_platformer/levels/"],
+    'include_files': ["ranny_parkour/assets/", "ranny_parkour/levels/"],
     'excludes': []
 }
 
@@ -25,11 +25,12 @@ bdist_dmg_options = {
 }
 
 bdist_mac_options = {
-    'iconfile': 'design_platformer/assets/icons/icon.png'
+    'iconfile': 'ranny_parkour/assets/icons/icon.png',
+    'bundle_name': 'The Ranny Parkour'
 }
 
 
-setup(name='design-platformer',
+setup(name='ranny_parkour',
       version='0.1.0',
       description='',
       options={

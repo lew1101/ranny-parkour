@@ -1,4 +1,3 @@
-
 import pygame as pg
 
 pg.mixer.pre_init()
@@ -8,8 +7,8 @@ BLOCK_SIZE = 64
 SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 12*BLOCK_SIZE, 10*BLOCK_SIZE
 COLOR_DEPTH = 32
 FPS = 60
-TITLE = "GAME"
-BASE_PATH = "design_platformer/"
+TITLE = "The Ranny Parkour"
+BASE_PATH = "ranny_parkour/"
 LEVELS = [
     BASE_PATH + "levels/world-1.yaml"
 ]
