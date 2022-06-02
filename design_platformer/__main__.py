@@ -1,38 +1,38 @@
 import pygame as pg
 
 from . import *
+from .widgets import Page, Text, FONT_LG
 from .game import Game
-
-pg.mixer.pre_init()
-pg.init()
-
-
-FONT_SM = pg.font.Font("design_platformer/assets/fonts/LuckiestGuy.ttf", 32)
-FONT_MD = pg.font.Font("design_platformer/assets/fonts/LuckiestGuy.ttf", 64)
-FONT_LG = pg.font.Font("design_platformer/assets/fonts/LuckiestGuy.ttf", 72)
-
-BLACK = pg.color.Color(0, 0, 0)
-WHITE = pg.color.Color(255, 255, 255)
 
 
 def main():
-    win = pg.display.set_mode(SCREEN_SIZE)
-    pg.display.set_caption(TITLE)
+    win = pg.display.get_surface()
     clock = pg.time.Clock()
+
+    main_page = Page(hidden=True)
+    t = Text("bruh", pos={"center": (SCREEN_WIDTH //
+             2, SCREEN_HEIGHT // 2)}, font=FONT_LG)
+    main_page.add(t)
+    main_page.hidden = True
 
     game = Game()
     game.start()
-
     # loop
-    running = True
+    done = True
 
-    while running:
+    while done:
         for e in pg.event.get():
             if e.type == pg.QUIT:
-                running = False
+                done = False
+
+        keys = pg.key.get_pressed()
+        game.process_keypresses(keys)
 
         game.tick()
         game.render(win)
+
+        if not main_page.hidden:
+            main_page.render(win)
 
         pg.display.flip()
         clock.tick(FPS)
