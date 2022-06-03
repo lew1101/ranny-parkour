@@ -5,40 +5,50 @@ from .widgets import Page, Text, FONT_LG
 from .game import Game
 
 
+class App:
+    def __init__(self):
+        self.win = pg.display.get_surface()
+        self.clock = pg.time.Clock()
+
+        self.main_page = Page(hidden=True)
+        t = Text("bruh", pos={"center": (SCREEN_WIDTH //
+                                         2, SCREEN_HEIGHT // 2)}, font=FONT_LG)
+        self.main_page.add(t)
+        self.main_page.hidden = True
+
+        self.game = Game()
+        self.done = False
+
+    def run_loop(self):
+        self.game.start()
+
+        while not self.done:
+            self.clock.tick(FPS) / 1000
+
+            for e in pg.event.get():
+                if e.type == pg.QUIT:
+                    return self.quit()
+
+            keys = pg.key.get_pressed()
+            self.game.process_keypresses(keys)
+
+            self.game.tick()
+            self.game.render(self.win)
+
+            if not self.main_page.hidden:
+                self.main_page.render(self.win)
+
+            pg.display.flip()
+
+    def quit(self):
+        self.done = True
+        pg.quit()
+        raise SystemExit
+
+
 def main():
-    win = pg.display.get_surface()
-    clock = pg.time.Clock()
-
-    main_page = Page(hidden=True)
-    t = Text("bruh", pos={"center": (SCREEN_WIDTH //
-             2, SCREEN_HEIGHT // 2)}, font=FONT_LG)
-    main_page.add(t)
-    main_page.hidden = True
-
-    game = Game()
-    game.start()
-    # loop
-    done = True
-
-    while done:
-        for e in pg.event.get():
-            if e.type == pg.QUIT:
-                done = False
-
-        keys = pg.key.get_pressed()
-        game.process_keypresses(keys)
-
-        game.tick()
-        game.render(win)
-
-        if not main_page.hidden:
-            main_page.render(win)
-
-        pg.display.flip()
-        clock.tick(FPS)
-
-    pg.quit()
-    raise SystemExit
+    app = App()
+    app.run_loop()
 
 
 if __name__ == "__main__":

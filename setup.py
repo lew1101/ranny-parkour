@@ -26,7 +26,7 @@ bdist_dmg_options = {
 
 bdist_mac_options = {
     'iconfile': 'ranny_parkour/assets/icons/icon.png',
-    'bundle_name': 'The Ranny Parkour'
+    'bundle_name': 'Ranny Parkour'
 }
 
 
