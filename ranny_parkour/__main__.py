@@ -23,11 +23,14 @@ class App:
         self.game.start()
 
         while not self.done:
-            self.clock.tick(FPS) / 1000
+            self.clock.tick(FPS)
 
             for e in pg.event.get():
                 if e.type == pg.QUIT:
                     return self.quit()
+                elif e.type == pg.KEYDOWN:
+                    if e.key == pg.K_n:
+                        self.game.reset()
 
             keys = pg.key.get_pressed()
             self.game.process_keypresses(keys)

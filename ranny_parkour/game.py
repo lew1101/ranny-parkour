@@ -453,6 +453,7 @@ class Game:
 
     def reset(self):
         self.load_level(0)
+        self.flags = 0
         self.start()
 
     def load_level(self, level_index: int):
