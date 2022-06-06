@@ -1,13 +1,17 @@
 import pygame as pg
 import yaml
-from enum import IntEnum, Flag
+from enum import IntEnum
 
 from . import *
 from .misc import load_image, SpriteSheet
+from .widgets import Text
+
+PLAYER_WIDTH = BLOCK_SIZE
+PLAYER_HEIGHT = 1.8*BLOCK_SIZE
 
 # ranny idle
 PLAYER_IDLE_IMAGE_RIGHT = pg.transform.scale(pg.image.load(
-    BASE_PATH+"assets/sprites/ranny_silouette.png"), (51, 102)).convert_alpha()
+    BASE_PATH+"assets/sprites/ranny_silouette.png"), (PLAYER_WIDTH, PLAYER_HEIGHT)).convert_alpha()
 PLAYER_IDLE_IMAGE_LEFT = pg.transform.flip(
     PLAYER_IDLE_IMAGE_RIGHT, 1, 0).convert_alpha()
 
@@ -15,7 +19,8 @@ PLAYER_IDLE_IMAGE_LEFT = pg.transform.flip(
 RANNY_SHEET_1 = SpriteSheet(BASE_PATH + "assets/sprites/ranny_spritesheet_1.png")  # noqa
 
 PLAYER_WALKING_IMAGES_RIGHT = list(map(
-    lambda image: pg.transform.scale(image, (51, 102)).convert_alpha(),
+    lambda image: pg.transform.scale(
+        image, (PLAYER_WIDTH, PLAYER_HEIGHT)).convert_alpha(),
     RANNY_SHEET_1.load_strip(pg.Rect(512, 0, 512, 1024), 4))
 )
 
@@ -26,11 +31,9 @@ PLAYER_WALKING_IMAGES_LEFT = [pg.transform.flip(
 RANNY_SHEET_2 = SpriteSheet(BASE_PATH + "assets/sprites/ranny_spritesheet_2.png")  # noqa
 
 PLAYER_JUMPING_IMAGE_RIGHT = pg.transform.scale(
-    RANNY_SHEET_2.image_at(pg.Rect(512, 0, 256, 510)), (51, 102)).convert_alpha()
+    RANNY_SHEET_2.image_at(pg.Rect(512, 0, 256, 510)), (PLAYER_WIDTH, PLAYER_HEIGHT)).convert_alpha()
 PLAYER_JUMPING_IMAGE_LEFT = pg.transform.flip(
     PLAYER_JUMPING_IMAGE_RIGHT, 1, 0).convert_alpha()
-
-COINS_SPRITE = load_image(BASE_PATH + "assets/sprites/coin.png")
 
 # ==================
 # Base Classes
@@ -57,7 +60,6 @@ class Block(pg.sprite.Sprite):
         GRASS = 1
         DIRT = 2
         LAVA = 3
-        ENDPOINT = 9
 
         @ classmethod
         def has_value(cls, value):
@@ -77,8 +79,7 @@ class Grassblock(Block):
     image = load_image(BASE_PATH + "assets/sprites/grass_block.png")
 
     def __init__(self, x: int, y: int, image: pg.Surface = None):
-        image = image or self.image
-        super().__init__(x, y, self.block_type, image)
+        super().__init__(x, y, self.block_type, image or self.image)
 
 
 class Dirtblock(Block):
@@ -86,8 +87,7 @@ class Dirtblock(Block):
     image = load_image(BASE_PATH + "assets/sprites/dirt_block.png")
 
     def __init__(self, x: int, y: int, image: pg.Surface = None):
-        image = image or self.image
-        super().__init__(x, y, self.block_type, image)
+        super().__init__(x, y, self.block_type, image or self.image)
 
 
 class Lavablock(Block):
@@ -95,18 +95,7 @@ class Lavablock(Block):
     image = load_image(BASE_PATH + "assets/sprites/lava_block.png")
 
     def __init__(self, x: int, y: int, image: pg.Surface = None):
-        image = image or self.image
-        super().__init__(x, y, self.block_type, image)
-
-
-class Endpoint(Block):
-    block_type = Block.BlockType.ENDPOINT
-    images = [load_image(BASE_PATH + "assets/sprites/lava_block.png")]
-
-    def __init__(self, x: int, y: int, images: pg.Surface = None):
-        self.images = images or self.images
-        self.steps = 0
-        super().__init__(x, y, self.block_type, self.images[0])
+        super().__init__(x, y, self.block_type, image or self.image)
 
 
 def BlockFactory(x, y, block_type=Block.BlockType.GRASS, image=None):
@@ -120,7 +109,7 @@ def BlockFactory(x, y, block_type=Block.BlockType.GRASS, image=None):
         None,
         None,
         None,
-        Endpoint
+        None,
     ]
     return constructors[block_type](x, y, image)
 
@@ -128,9 +117,18 @@ def BlockFactory(x, y, block_type=Block.BlockType.GRASS, image=None):
 
 
 class Coin(Entity):
-    def __init__(self, x: float, y: float, image: pg.Surface):
-        super().__init__(x, y, image)
+    image = load_image(BASE_PATH + "assets/sprites/coin.png")
+
+    def __init__(self, x: float, y: float, image: pg.Surface = None):
+        super().__init__(x, y, image or self.image)
         self.val = 1
+
+
+class Endpoint(Entity):
+    image = load_image(BASE_PATH+"assets/sprites/flag up.png")
+
+    def __init__(self, x: int, y: int, image: pg.Surface = None):
+        super().__init__(x, y, image or self.image)
 
 
 # ==================
@@ -168,13 +166,16 @@ class Level:
             self.background_image = pg.image.load(
                 background_image).convert_alpha()
         self.background_color = world_args.get("background-color")
+        self.total_coins = 0
 
         # define layers
         self.starting_blocks = []
         self.starting_coins = []
+        self.starting_endpoints = []
 
         self.blocks = pg.sprite.Group()
         self.coins = pg.sprite.Group()
+        self.endpoints = pg.sprite.Group()
 
         self.active_sprites = pg.sprite.Group()
         self.static_sprites = pg.sprite.Group()
@@ -188,35 +189,43 @@ class Level:
         if len(block_str) != self.rows * self.cols:
             raise Exception(
                 f"length of block string {len(block_str)} does not match given \
-                row {self.row} and col {self.cols} attributes")
+                row {self.rows} and col {self.cols} attributes")
 
         for y in range(self.rows):
             for x in range(self.cols):
                 idx = y * self.cols + x
                 cell = block_str[idx]
-                blit_x, blit_y = x * BLOCK_SIZE, y * BLOCK_SIZE
+                block_x, block_y = x * BLOCK_SIZE, y * BLOCK_SIZE
 
                 # check cell is a block
                 if cell == "0":
                     pass
                 elif cell.isdigit() and Block.BlockType.has_value((block_type := int(cell))):
                     self.starting_blocks.append(
-                        BlockFactory(blit_x, blit_y, block_type))
+                        BlockFactory(block_x, block_y, block_type))
                 # check cell is a coin
                 elif cell == "C":
                     self.starting_coins.append(
-                        Coin(blit_x, blit_y, COINS_SPRITE))
+                        Coin(block_x, block_y))
+                    self.total_coins += 1
+                elif cell == "F":
+                    self.starting_endpoints.append(
+                        Endpoint(block_x, block_y)
+                    )
                 else:
-                    raise Exception(F"{cell} on ({x}, {y}) is invalid")
+                    raise Exception(
+                        F"{cell} on ({block_x}, {block_y}) is invalid")
 
         self.blocks.add(self.starting_blocks)
         self.coins.add(self.starting_coins)
+        self.endpoints.add(self.starting_endpoints)
 
-        self.active_sprites.add(self.coins)
+        self.active_sprites.add(self.coins, self.starting_endpoints)
         self.static_sprites.add(self.blocks)
 
         self.background_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
         self.blocks_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
+        self.active_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
 
         if self.background_color:
             self.background_layer.fill(pg.Color(*self.background_color))
@@ -227,7 +236,7 @@ class Level:
 
         self.static_sprites.draw(self.blocks_layer)
 
-    @ staticmethod
+    @staticmethod
     def from_file(path: str):
         with open(path, 'r') as f:
             data = yaml.load(f, yaml.Loader)["data"]
@@ -255,14 +264,16 @@ class Player(Entity):
         [PLAYER_JUMPING_IMAGE_LEFT, PLAYER_JUMPING_IMAGE_RIGHT],
     ]
 
-    def __init__(self, level: Level):
-        x, y = level.player_starting_pos
+    def __init__(self, game: 'Game'):
+        self.game = game
+        self.level = game.level
+        x, y = self.level.player_starting_pos
         super().__init__(x, y, PLAYER_IDLE_IMAGE_RIGHT)
 
-        self.level = level
-        self.lives = level.player_lives
-        self.speed = level.player_speed
-        self.jump_power = level.player_jump_power
+        self.coins_collected = 0
+        self.lives = self.level.player_lives
+        self.speed = self.level.player_speed
+        self.jump_power = self.level.player_jump_power
 
         self.grounded = False
         self.facing_right = True
@@ -276,6 +287,8 @@ class Player(Entity):
         self.apply_gravity(self.level.gravity,
                            self.level.terminal_velocity)
         self.move_and_process_blocks()
+        self.process_coins()
+        self.process_endpoints()
         self.check_world_boundaries()
         # update player anim stage
         self.update_state()
@@ -348,8 +361,6 @@ class Player(Entity):
             # special actions
             if block.block_type == Block.BlockType.LAVA:
                 return self.die()
-            elif block.block_type == Block.BlockType.ENDPOINT:
-                return self.win()
 
             if self.vy > 0:
                 self.rect.bottom = block.rect.top
@@ -364,19 +375,31 @@ class Player(Entity):
         self.rect.x, self.rect.y = self.level.player_respawn_pos
 
     def win(self):
-        print("win")
+        self.game.flags |= Game.Flags.WIN
 
     def respawn(self):
         pass
 
-# ==================
-# Game
-# ==================
+    def process_coins(self):
+        collide_list = pg.sprite.spritecollide(self, self.level.coins, False)
+        for coin in collide_list:
+            coin.kill()
+            self.coins_collected += 1
+
+    def process_endpoints(self):
+        collide_list = pg.sprite.spritecollide(
+            self, self.level.endpoints, False)
+        if len(collide_list) > 0:
+            self.win()
+
+        # ==================
+        # Game
+        # ==================
 
 
 class Game:
-    class Flags(Flag):
-        pass
+    class Flags(IntEnum):
+        WIN = 1
 
     def __init__(self):
         self.game_over = False
@@ -405,12 +428,28 @@ class Game:
             if self.player.grounded:
                 self.player.stop()
 
-    def render(self, surf: pg.Surface, coords=(0, 0)):
+    def calculate_offset(self):
+        x = -self.player.rect.centerx + SCREEN_WIDTH / 2
+
+        if self.player.rect.centerx < SCREEN_WIDTH / 2:
+            x = 0
+        elif self.player.rect.centerx > self.level.width - SCREEN_WIDTH / 2:
+            x = -self.level.width + SCREEN_WIDTH
+
+        return x, 0
+
+    def render(self, surf: pg.Surface):
+        self.level.active_layer.fill(TRANSPARENT)
+        self.level.active_sprites.draw(self.level.active_layer)
+
+        blit_coords = self.calculate_offset()
         surf.blits([
-            (self.level.background_layer, coords),
-            (self.level.blocks_layer, coords)
+            (self.level.background_layer, blit_coords),
+            (self.level.blocks_layer, blit_coords),
+            (self.level.active_layer, blit_coords)
         ])
-        self.level.active_sprites.draw(surf)
+        self.show_score(surf)
+        self.show_win_text(surf)
 
     def reset(self):
         self.load_level(0)
@@ -419,4 +458,28 @@ class Game:
     def load_level(self, level_index: int):
         self.curr_level = level_index
         self.level = Level.from_file(LEVELS[level_index])
-        self.player = Player(self.level)
+        self.player = Player(self)
+
+    def show_win_text(self, surf: pg.Surface):
+        if self.flags & Game.Flags.WIN:
+            text = Text('BRUH', FONT_LG)
+            text.rect.center = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+            text.draw(surf)
+
+    def show_score(self, surf: pg.Surface):
+        if not hasattr(self, "score_surface") or self.prev_score != self.player.coins_collected:
+            image = Coin.image.copy()
+            image_rect = image.get_rect(x=0, y=0)
+            text = Text(f"{self.player.coins_collected}/{self.level.total_coins}",
+                        FONT_MD)
+            text.rect.left = image_rect.right
+            text.rect.y = 25
+            self.score_surf = pg.Surface(
+                (image_rect.width+text.rect.width, max(image_rect.height, text.rect.height)), pg.SRCALPHA, COLOR_DEPTH)
+            r = self.score_surf.get_rect(right=SCREEN_WIDTH-15, top=0)
+
+            self.score_surf.blit(image, (0, 0))
+            text.draw(self.score_surf)
+
+        surf.blit(self.score_surf, r)
+        self.prev_score = self.player.coins_collected

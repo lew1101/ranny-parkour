@@ -8,14 +8,13 @@ executables = [
     Executable(
         script='./main.py',
         base=base,
-        target_name='design-platformer',
+        target_name='ranny-parkour',
     )
 ]
 
 # Dependencies are automatically detected, but it might need
 # fine tuning.
 build_exe_options = {
-    'packages': ["pygame", "yaml"],
     'include_files': ["ranny_parkour/assets/", "ranny_parkour/levels/"],
     'excludes': []
 }

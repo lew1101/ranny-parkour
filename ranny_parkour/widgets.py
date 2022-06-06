@@ -4,10 +4,10 @@ from . import *
 
 
 class UIELement(pg.sprite.Sprite):
-    def __init__(self, images: list[pg.Surface], pos: dict):
+    def __init__(self, images: list[pg.Surface], pos: dict = None):
         super().__init__()
         self.images = images
-        self.rects = [image.get_rect(**pos) for image in self.images]
+        self.rects = [image.get_rect(**(pos or {})) for image in self.images]
         self.state = 0
 
     @property
@@ -20,18 +20,21 @@ class UIELement(pg.sprite.Sprite):
 
 
 class Text(pg.sprite.Sprite):
-    def __init__(self, text: str, pos: dict, font: pg.font.Font, antialias=True, color=BLACK, *args, **kwargs) -> pg.Surface:
+    def __init__(self, text: str, font: pg.font.Font, antialias=True, color=BLACK, *args, **kwargs) -> pg.Surface:
         super().__init__()
-        self.image = font.render(text, antialias, color, *args, **kwargs)
-        self.rect = self.image.get_rect(**pos)
+        self.image = font.render(text, antialias, color, *args)
+        self.rect = self.image.get_rect()
+
+    def draw(self, surf: pg.Surface):
+        surf.blit(self.image, self.rect)
 
 
 class Button(UIELement):
-    def __init__(self, pos: dict, default_image: pg.Surface, on_hover_image: pg.Surface = None):
+    def __init__(self, default_image: pg.Surface, on_hover_image: pg.Surface = None, pos: dict = None, ):
         self.default_image = default_image
         self.on_hover_image = on_hover_image if on_hover_image is not None else default_image
         self.images = [self.default_image, self.on_hover_image]
-        super().__init__(self.images, **pos)
+        super().__init__(self.images, pos)
 
     def check_mouse_over(self, mouse_pos):
         self.state = 1 if self.rect.collidepoint(mouse_pos) else 0
