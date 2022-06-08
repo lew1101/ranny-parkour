@@ -21,7 +21,8 @@ FPS = 45
 TITLE = "Ranny Parkour"
 BASE_PATH = find_base_path()
 LEVELS = [
-    BASE_PATH + "levels/world-1.yaml"
+    BASE_PATH + "levels/super_ranny.yaml",
+    BASE_PATH + "levels/lucas.yaml"
 ]
 
 FONT_SM = pg.font.Font(BASE_PATH + "assets/fonts/LuckiestGuy.ttf", 32)

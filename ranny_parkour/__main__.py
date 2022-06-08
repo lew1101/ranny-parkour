@@ -10,16 +10,11 @@ class App:
         self.win = pg.display.get_surface()
         self.clock = pg.time.Clock()
 
-        self.main_page = Page(hidden=True)
-        t = Text("bruh", pos={"center": (SCREEN_WIDTH //
-                                         2, SCREEN_HEIGHT // 2)}, font=FONT_LG)
-        self.main_page.add(t)
-        self.main_page.hidden = True
-
         self.game = Game()
         self.done = False
 
     def run_loop(self):
+        self.game.load_level(0)
         self.game.start()
 
         while not self.done:
@@ -31,15 +26,15 @@ class App:
                 elif e.type == pg.KEYDOWN:
                     if e.key == pg.K_n:
                         self.game.reset()
+                    elif e.key in range(pg.K_1, pg.K_9):
+                        level_index = e.key - pg.K_1  # hack
+                        self.game.load_level(level_index)
 
             keys = pg.key.get_pressed()
             self.game.process_keypresses(keys)
 
             self.game.tick()
             self.game.render(self.win)
-
-            if not self.main_page.hidden:
-                self.main_page.render(self.win)
 
             pg.display.flip()
 

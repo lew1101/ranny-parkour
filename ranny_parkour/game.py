@@ -1,3 +1,4 @@
+from re import L
 import pygame as pg
 import yaml
 from enum import IntEnum
@@ -139,8 +140,11 @@ class Level:
     def __init__(self, data: dict):
         self.completed = False
 
+        self.name = data.get("name")
+
+        level_data = data.get("data", {})
         # player
-        player_args = data.get("player", {})
+        player_args = level_data.get("player", {})
         self.player_starting_pos = tuple(
             [v * BLOCK_SIZE for v in player_args.get("starting-pos", (0, 0))])
         self.player_respawn_pos = tuple(
@@ -150,7 +154,7 @@ class Level:
         self.player_jump_power = player_args.get("jump-power")
 
         # world
-        world_args = data.get("world", {})
+        world_args = level_data.get("world", {})
         self.biome = world_args.get("biome", "default")
         self.rows = world_args.get("rows")
         self.cols = world_args.get("cols")
@@ -239,8 +243,8 @@ class Level:
     @staticmethod
     def from_file(path: str):
         with open(path, 'r') as f:
-            data = yaml.load(f, yaml.Loader)["data"]
-            return Level(data)
+            level_data = yaml.load(f, yaml.Loader)
+            return Level(level_data)
 
     def reset(self):
         pass
@@ -403,7 +407,6 @@ class Game:
 
     def __init__(self):
         self.game_over = False
-        self.flags = 0
         self.reset()
 
     def start(self):
@@ -448,18 +451,32 @@ class Game:
             (self.level.blocks_layer, blit_coords),
             (self.level.active_layer, blit_coords)
         ])
+        self.show_level_text(surf)
         self.show_score(surf)
         self.show_win_text(surf)
 
     def reset(self):
-        self.load_level(0)
         self.flags = 0
         self.start()
 
     def load_level(self, level_index: int):
-        self.curr_level = level_index
-        self.level = Level.from_file(LEVELS[level_index])
-        self.player = Player(self)
+        try:
+            self.curr_level = level_index
+            self.level = Level.from_file(LEVELS[level_index])
+            self.player = Player(self)
+            self.reset()
+            return 0
+        except IndexError:
+            return -1
+
+    def show_level_text(self, surf: pg.Surface):
+        if not hasattr(self, "prev_level") or self.prev_level != self.curr_level:
+            self.level_text = Text(
+                f"{self.curr_level+1}. {self.level.name}", FONT_SM)
+            self.level_text.rect.x = 15
+            self.level_text.rect.y = 15
+        self.level_text.draw(surf)
+        self.prev_level = self.curr_level
 
     def show_win_text(self, surf: pg.Surface):
         if self.flags & Game.Flags.WIN:
@@ -468,19 +485,19 @@ class Game:
             text.draw(surf)
 
     def show_score(self, surf: pg.Surface):
-        if not hasattr(self, "score_surface") or self.prev_score != self.player.coins_collected:
+        if not hasattr(self, "prev_score") or self.prev_score != self.player.coins_collected:
             image = Coin.image.copy()
-            image_rect = image.get_rect(x=0, y=0)
+            image_rect = image.get_rect(x=0, y=-10)
+
             text = Text(f"{self.player.coins_collected}/{self.level.total_coins}",
                         FONT_MD)
             text.rect.left = image_rect.right
-            text.rect.y = 25
+            text.rect.y = 15
             self.score_surf = pg.Surface(
                 (image_rect.width+text.rect.width, max(image_rect.height, text.rect.height)), pg.SRCALPHA, COLOR_DEPTH)
-            r = self.score_surf.get_rect(right=SCREEN_WIDTH-15, top=0)
+            self.r = self.score_surf.get_rect(right=SCREEN_WIDTH-15, top=0)
 
-            self.score_surf.blit(image, (0, 0))
+            self.score_surf.blit(image, image_rect)
             text.draw(self.score_surf)
-
-        surf.blit(self.score_surf, r)
+        surf.blit(self.score_surf, self.r)
         self.prev_score = self.player.coins_collected
