@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "The Ranny Parkour"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 license = "MIT"
 authors = ["lew1101 <kennethlew001@gmail.com>", "Junlin Song <jsong@wearelcc.ca>", "Aryan Tavassoli <atavassoli@wearelcc.ca>"]

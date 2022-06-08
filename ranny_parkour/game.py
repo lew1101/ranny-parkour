@@ -218,7 +218,7 @@ class Level:
                     )
                 else:
                     raise Exception(
-                        F"{cell} on ({block_x}, {block_y}) is invalid")
+                        f"letter “{cell}” in level {self.name} on ({x}, {y}) is invalid")
 
         self.blocks.add(self.starting_blocks)
         self.coins.add(self.starting_coins)
