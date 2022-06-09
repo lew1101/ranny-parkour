@@ -24,6 +24,7 @@ LEVELS = [
     BASE_PATH + "levels/super_ranny.yaml",
     BASE_PATH + "levels/different_paths.yaml"
 ]
+END_GAME_TEXT = "BRUH"
 
 FONT_SM = pg.font.Font(BASE_PATH + "assets/fonts/LuckiestGuy.ttf", 32)
 FONT_MD = pg.font.Font(BASE_PATH + "assets/fonts/LuckiestGuy.ttf", 50)

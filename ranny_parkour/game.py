@@ -480,7 +480,7 @@ class Game:
 
     def show_win_text(self, surf: pg.Surface):
         if self.flags & Game.Flags.WIN:
-            text = Text('BRUH', FONT_LG)
+            text = Text(END_GAME_TEXT, FONT_LG)
             text.rect.center = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
             text.draw(surf)
 
