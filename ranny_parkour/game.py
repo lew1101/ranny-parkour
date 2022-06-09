@@ -407,7 +407,7 @@ class Game:
 
     def __init__(self):
         self.game_over = False
-        self.reset()
+        self.flags = 0
 
     def start(self):
         pass
@@ -458,13 +458,13 @@ class Game:
     def reset(self):
         self.flags = 0
         self.start()
+        self.load_level(self.curr_level)
 
     def load_level(self, level_index: int):
         try:
             self.level = Level.from_file(LEVELS[level_index])
             self.player = Player(self)
             self.curr_level = level_index
-            self.reset()
             return 0
         except IndexError:
             return -1
