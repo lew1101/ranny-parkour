@@ -33,7 +33,7 @@ bdist_mac_options = {
 }
 
 
-setup(name=metadata['name'],
+setup(name="ranny-parkour",
       version=metadata['version'],
       description=metadata['description'],
       options={
