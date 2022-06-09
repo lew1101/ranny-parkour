@@ -1,21 +1,21 @@
 ## Ranny Parkour
 ![screenshot](screenshot.png)
 
-Made using pygame.
+Made using pygame.\
 Currently, the game has two levels.
 
 ### Gameplay
-To navigate, use **WASD** or arrow keys.
-To restart level, press the **n** key.
+To navigate, use **WASD** or arrow keys.\
+To restart level, press the **n** key.\
 To select a level, use number keys **1-9**.
 
 ### Releases
 
-Currently, releases are only avaliable for **macOS>=12.3 (Monterey)**
+Currently, releases are only avaliable for **macOS>=12.3 (Monterey)**\
 To install the latest version, go under **releases** and install the **.dmg** file. 
 
 ### Building the app 
-To build the game for other macOS versions, you must have **python>=3.10**. 
+To build the game for other macOS versions, you must have **python>=3.10**. \
 Currently, the build system uses **cx-Freeze**. 
 
 Clone the repo to local machine:
