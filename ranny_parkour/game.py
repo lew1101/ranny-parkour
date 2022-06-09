@@ -461,9 +461,9 @@ class Game:
 
     def load_level(self, level_index: int):
         try:
-            self.curr_level = level_index
             self.level = Level.from_file(LEVELS[level_index])
             self.player = Player(self)
+            self.curr_level = level_index
             self.reset()
             return 0
         except IndexError:
