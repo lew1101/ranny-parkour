@@ -126,7 +126,7 @@ class Coin(Entity):
 
 
 class Endpoint(Entity):
-    image = load_image(BASE_PATH+"assets/sprites/flag up.png")
+    image = load_image(BASE_PATH+"assets/sprites/pride.png")
 
     def __init__(self, x: int, y: int, image: pg.Surface = None):
         super().__init__(x, y, image or self.image)
@@ -310,12 +310,12 @@ class Player(Entity):
 
     def update_state(self):
         new_state = None
-        if self.grounded:
-            if self.vx != 0:
-                new_state = Player.State.WALKING
-            else:
-                new_state = Player.State.IDLE
+        if self.vx != 0:
+            new_state = Player.State.WALKING
         else:
+            new_state = Player.State.IDLE
+
+        if not self.grounded and (self.vy < 0 or self.state == Player.State.JUMPING):
             new_state = Player.State.JUMPING
 
         if self.state != new_state:
@@ -428,7 +428,7 @@ class Game:
         elif keys[pg.K_d] or keys[pg.K_RIGHT]:
             self.player.move_right()
         else:
-            if self.player.grounded:
+            if self.player.state != Player.State.JUMPING:
                 self.player.stop()
 
     def calculate_offset(self):

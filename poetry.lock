@@ -77,14 +77,14 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "46360a2edf1e5f01a4d9ebe70850f938934fe3559d4b961fd139ea5f83ac7923"
+content-hash = "d581d6f29b8ea8f754302a6a3700792a504e9bf572af7b3f7941c3660c3a47dd"
 
 [metadata.files]
 autopep8 = [
