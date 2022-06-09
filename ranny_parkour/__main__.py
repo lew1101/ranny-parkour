@@ -1,7 +1,6 @@
 import pygame as pg
 
 from . import *
-from .widgets import Page, Text, FONT_LG
 from .game import Game
 
 

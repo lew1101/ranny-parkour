@@ -1,9 +1,12 @@
 import sys
 from cx_Freeze import setup, Executable
-import tomli
 
-with open("./pyproject.toml", "rb") as f:
-    metadata = tomli.load(f)['tool']['poetry']
+METADATA = {
+    "name": "ranny-parkour",
+    "version": "0.2.1",
+    "description": "",
+    "license": "MIT"
+}
 
 
 base = 'Win32GUI' if sys.platform == 'win32' else None
@@ -32,12 +35,10 @@ bdist_mac_options = {
     'bundle_name': 'Ranny Parkour'
 }
 
-
-setup(name="ranny-parkour",
-      version=metadata['version'],
-      description=metadata['description'],
-      options={
-          'build_exe': build_exe_options,
-          'bdist_dmg': bdist_dmg_options,
-          'bdist_mac': bdist_mac_options},
-      executables=executables,)
+setup(
+    **METADATA,
+    options={
+        'build_exe': build_exe_options,
+        'bdist_dmg': bdist_dmg_options,
+        'bdist_mac': bdist_mac_options},
+    executables=executables,)

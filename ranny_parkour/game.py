@@ -1,4 +1,3 @@
-from re import L
 import pygame as pg
 import yaml
 from enum import IntEnum
