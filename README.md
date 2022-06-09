@@ -1,8 +1,9 @@
 ## Ranny Parkour
-![screenshot](screenshot.png)
 
-Made using pygame.\
+Made using **pygame**.\
 Currently, the game has two levels.
+
+![screenshot](screenshot.png)
 
 ### Gameplay
 To navigate, use **WASD** or arrow keys.\
