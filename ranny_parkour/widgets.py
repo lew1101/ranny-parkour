@@ -2,6 +2,9 @@ import pygame as pg
 
 from . import *
 
+# below you will find classes have never been used
+# definitely had plans that was too ambitious lol
+
 
 class UIELement(pg.sprite.Sprite):
     def __init__(self, images: list[pg.Surface], pos: dict = None):

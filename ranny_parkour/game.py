@@ -6,6 +6,8 @@ from . import *
 from .misc import load_image, SpriteSheet
 from .widgets import Text
 
+# welcome, adventurer, to the land of spagetti code
+
 PLAYER_WIDTH = BLOCK_SIZE
 PLAYER_HEIGHT = 1.8*BLOCK_SIZE
 
@@ -136,6 +138,12 @@ class Endpoint(Entity):
 # ==================
 
 class Level:
+    @staticmethod
+    def from_file(path: str):
+        with open(path, 'r') as f:
+            level_data = yaml.load(f, yaml.Loader)
+            return Level(level_data)
+
     def __init__(self, data: dict):
         self.completed = False
 
@@ -185,14 +193,16 @@ class Level:
 
         block_str = world_args.get("blocks")
 
-        if not isinstance(block_str, str):
-            raise Exception("block string needs to be an instance of string")
+        # check block_str is string
+        assert isinstance(block_str, str), \
+            "block string needs to be an instance of string"
 
         block_str = block_str.replace("\n", "")
-        if len(block_str) != self.rows * self.cols:
-            raise Exception(
-                f"length of block string {len(block_str)} does not match given \
-                row {self.rows} and col {self.cols} attributes")
+
+        # check length of block_str is correct
+        assert len(block_str) == self.rows * self.cols, \
+            f"length of block string {len(block_str)} does not match given \
+            row {self.rows} and col {self.cols} attributes"
 
         for y in range(self.rows):
             for x in range(self.cols):
@@ -200,24 +210,27 @@ class Level:
                 cell = block_str[idx]
                 block_x, block_y = x * BLOCK_SIZE, y * BLOCK_SIZE
 
-                # check cell is a block
                 if cell == "0":
-                    pass
+                    # empty
+                    continue
                 elif cell.isdigit() and Block.BlockType.has_value((block_type := int(cell))):
+                    # block
                     self.starting_blocks.append(
                         BlockFactory(block_x, block_y, block_type))
-                # check cell is a coin
                 elif cell == "C":
+                    # coin
                     self.starting_coins.append(
                         Coin(block_x, block_y))
                     self.total_coins += 1
                 elif cell == "F":
+                    # endpoint
                     self.starting_endpoints.append(
                         Endpoint(block_x, block_y)
                     )
                 else:
+                    # invalid value
                     raise Exception(
-                        f"letter “{cell}” in level {self.name} on ({x}, {y}) is invalid")
+                        f"value “{cell}” in level {self.name} on cell ({x}, {y}) is invalid")
 
         self.blocks.add(self.starting_blocks)
         self.coins.add(self.starting_coins)
@@ -226,6 +239,7 @@ class Level:
         self.active_sprites.add(self.coins, self.starting_endpoints)
         self.static_sprites.add(self.blocks)
 
+        # is this a good idea?
         self.background_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
         self.blocks_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
         self.active_layer = pg.Surface(self.size, pg.SRCALPHA, COLOR_DEPTH)
@@ -239,12 +253,6 @@ class Level:
 
         self.static_sprites.draw(self.blocks_layer)
 
-    @staticmethod
-    def from_file(path: str):
-        with open(path, 'r') as f:
-            level_data = yaml.load(f, yaml.Loader)
-            return Level(level_data)
-
     def reset(self):
         pass
 
@@ -252,8 +260,6 @@ class Level:
 # ==================
 # Player
 # ==================
-
-
 class Player(Entity):
     class State(IntEnum):
         IDLE = 0
@@ -468,6 +474,7 @@ class Game:
         except IndexError:
             return -1
 
+    # the methods below need to be moved out of here (too lazy)
     def show_level_text(self, surf: pg.Surface):
         if not hasattr(self, "prev_level") or self.prev_level != self.curr_level:
             self.level_text = Text(
